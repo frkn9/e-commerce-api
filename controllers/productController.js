@@ -1,25 +1,39 @@
 const Product = require('../models/Product')
+const Review = require('../models/Review')
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors/customError')
 
 const getAllProducts = async (req, res) => {
-    const products = await Product.find({})
+    let products = await Product.find({}).lean()
     if(!products){
         throw new CustomError('Product not found.')
     }
+
+    let reviews
+    let productId
+    for(let i = 0; i < products.length; i++){
+        productId = products[i]._id
+        reviews = await Review.find({ 'product': productId });
+        products[i].reviews = reviews
+        products[i].reviewCount = reviews.length
+    }
+    
     res.status(StatusCodes.OK).json( {productsCount: products.length, products} )
 }
 
-const getProduct = async (req, res) => {
+const getProduct = async (req, res ) => {
     const {
         params: {id: productId},
     } = req
 
-    const product = await Product.findOne({_id: productId})
+    const product = await Product.findOne({_id: productId}).lean()
     if(!product){
         throw new CustomError('Product does not exist')
     }
-    res.status(StatusCodes.OK).json({product})
+
+    const reviews = await Review.find({ 'product': productId });
+    product.reviews = reviews
+    res.status(StatusCodes.OK).json({product, reviewCount:reviews.length, reviews})
 }
 
 const updateProduct = async (req, res) => {
@@ -59,7 +73,6 @@ const deleteProduct = async (req, res) => {
         throw new CustomError('Product does not exist')
     }
     res.status(StatusCodes.OK).json( {msg: "Product successfully deleted"})
-
 }
 
 

@@ -1,4 +1,6 @@
 const Seller = require('../models/Seller')
+const Product = require('../models/Product')
+
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors/customError')
 
@@ -15,10 +17,13 @@ const getSeller = async (req, res) => {
         params: {id: sellerId},
     } = req
 
-    const seller = await Seller.findOne({_id: sellerId})
+    const seller = await Seller.findOne({_id: sellerId}).lean()
     if(!seller){
         throw new CustomError('Seller does not exist')
     }
+
+    const products = await Product.find({ 'seller': sellerId });       //get products the seller is selling
+    seller.products = products
     res.status(StatusCodes.OK).json({seller})
 }
 
