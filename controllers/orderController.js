@@ -41,7 +41,7 @@ const updateOrder = async (req, res) => {
 }
 
 const createOrder = async (req, res) => {
-    const order = await order.create(req.body)
+    const order = await Order.create(req.body)
     if(!order){
         throw new CustomError('Could not create order')
     }
@@ -53,7 +53,7 @@ const deleteOrder =  async(req, res) => {
         params: {id: orderId},
     } = req
 
-    const order = await order.findByIdAndDelete({_id:orderId})
+    const order = await Order.findByIdAndDelete({_id:orderId})
 
     if(!order){
         throw new CustomError('Order does not exist')

@@ -2,14 +2,14 @@ const express = require('express')
 const router = express.Router()
 
 const { 
-    getRouter,
-    updateRouter,
-    createRouter,
-    deleteRouter,
-    getAllRouters
-} = require('../controllers/routerController')
+    getReview,
+    updateReview,
+    createReview,
+    deleteReview,
+    getAllReviews
+} = require('../controllers/reviewContoller')
 
-router.route('/:id').get(getRouter).patch(updateRouter).delete(deleteRouter)
-router.route('/').post(createRouter).get(getAllRouters)
+router.route('/:id').get(getReview).patch(updateReview).delete(deleteReview)
+router.route('/').post(createReview).get(getAllReviews)
 
 module.exports = router

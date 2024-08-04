@@ -9,11 +9,18 @@ const ReviewSchema = new mongoose.Schema({
     comment: {
         type:String,
         minlength:1,
-        maxlength:250
+        maxlength:250,
+        required:[true, "Please enter a comment"]
     },
     rating: {
         type:Number,
-        default:null
+        default:null,
+        min:0,
+        max:5,
+        validate: {
+            validator: Number.isInteger,
+            message: "rating is not an integer value"
+        }
     }
 }, {timestamps:true})
 
