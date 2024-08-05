@@ -29,7 +29,14 @@ const updateReview = async (req, res) => {
         params: {id: reviewId},
     } = req
 
-    const review = await Review.findByIdAndUpdate(
+    const product = await Product.findOne({_id: req.body.product}).lean()
+    if(!product){
+        throw new CustomError("User doesn't have an existing review on this product")
+    }
+
+    const oldReview = await Review.findOne({_id:reviewId}).lean()
+
+    const review = await Review.updateOne(
         {_id: reviewId, user:req.user.userId},
         req.body,
         {new: true}
@@ -39,7 +46,16 @@ const updateReview = async (req, res) => {
         throw new CustomError('Review does not exist')
     }
 
-    res.status(StatusCodes.OK).json({ review })
+    
+    const newRating = (req.body.rating - oldReview.rating + (product.avgRating*product.amountRatings)) / (product.amountRatings)
+    product.avgRating = newRating
+    const newProduct = await Product.updateOne({_id:product._id}, product, {new:true})
+
+    if(!newProduct){
+        throw new CustomError('Could not update product rating')
+    }
+
+    res.status(StatusCodes.OK).json({ msg: "Review updated" })
 }
 
 const createReview = async (req, res) => {
@@ -54,7 +70,7 @@ const createReview = async (req, res) => {
     const newRating = (req.body.rating + (product.avgRating*product.amountRatings)) / (product.amountRatings + 1)
     product.avgRating = newRating
     product.amountRatings = product.amountRatings + 1
-    const newProduct = await Product.findByIdAndUpdate({_id:product._id}, product, {new:true})
+    const newProduct = await Product.updateOne({_id:product._id}, product, {new:true})
     if(!newProduct){
         throw new CustomError('Could not update product rating')
     }
@@ -85,12 +101,15 @@ const deleteReview = async (req, res) => {
     product.avgRating = newRating
     product.amountRatings = product.amountRatings - 1
     console.log(newRating, review.rating, product.amountRatings)
-    const newProduct = await Product.findByIdAndUpdate({_id:product._id}, product, {new:true})
+    const newProduct = await Product.updateOne({_id:product._id}, product, {new:true})
     if(!newProduct){
         throw new CustomError('Could not update product rating')
     }
 
-    await Review.findByIdAndDelete({_id: reviewId})
+    const _review = await Review.deleteOne({_id: reviewId, user:req.user.userId})
+    if(_review.deletedCount == 0){
+        throw new CustomError('Review does not exist')
+    }
 
     res.status(StatusCodes.OK).json( {msg: "Review successfully deleted"})
 }

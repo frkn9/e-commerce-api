@@ -44,7 +44,7 @@ const ProductSchema = new mongoose.Schema({
                 return true
             },
             message: "Seller does not exist"
-        } 
+        }, 
     },
     price: {
         type:Number,
