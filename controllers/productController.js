@@ -32,8 +32,9 @@ const getProduct = async (req, res ) => {
     }
 
     const reviews = await Review.find({ 'product': productId });
+    product.reviewCount = reviews.length
     product.reviews = reviews
-    res.status(StatusCodes.OK).json({product, reviewCount:reviews.length, reviews})
+    res.status(StatusCodes.OK).json({product})
 }
 
 const updateProduct = async (req, res) => {

@@ -1,6 +1,9 @@
 const Order = require('../models/Order')
+const Product = require('../models/Product')
+const Seller = require('../models/Seller')
 const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors/customError')
+const { findById, findByIdAndUpdate } = require('../models/Review')
 
 const getAllOrders = async(req, res) => {
     const orders = await Order.find({})
@@ -45,6 +48,13 @@ const createOrder = async (req, res) => {
     if(!order){
         throw new CustomError('Could not create order')
     }
+
+    const product = await Product.findOne({_id: order.product})
+    const seller = await Seller.findOne({_id: product.seller}).lean()
+
+    seller.productsSold = seller.productsSold + 1
+    await Seller.findByIdAndUpdate({_id:seller._id}, seller)
+
     res.status(StatusCodes.CREATED).json( {order} )
 }
 
