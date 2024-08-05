@@ -8,12 +8,14 @@ port = process.env.PORT
 const express = require('express')
 const app = express()
 
+
 const productRouter = require('./routers/productRouter')
 const sellerRouter = require('./routers/sellerRouter')
 const authRouter = require('./routers/authRouter')
 const orderRouter = require('./routers/orderRouter')
 const reviewRouter = require('./routers/reviewRouter')
 
+const auth = require('./middleware/auth')
 const routeNotFound = require('./middleware/routeNotFound')
 const errorHandler = require('./middleware/errorHandler')
 
@@ -21,8 +23,8 @@ app.use(express.json())
 app.use('/api/v1/product', productRouter)
 app.use('/api/v1/seller', sellerRouter)
 app.use('/api/v1/auth', authRouter)
-app.use('/api/v1/order', orderRouter)
-app.use('/api/v1/review', reviewRouter)
+app.use('/api/v1/order', auth, orderRouter)
+app.use('/api/v1/review', auth, reviewRouter)
 
 app.use(errorHandler)
 app.use(routeNotFound)

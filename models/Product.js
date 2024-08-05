@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Seller = require('./Seller')
 
 const ProductSchema = new mongoose.Schema({
     category: {
@@ -28,12 +29,22 @@ const ProductSchema = new mongoose.Schema({
     },
     inStock: {
         type:Number,
-        default:1
+        default:10
     },
     seller: {
         type: mongoose.Types.ObjectId,
         ref:'Seller',
-        required:[true, "Seller ID is needed"]
+        required:[true, "Seller ID is needed"],
+        validate: {
+            validator: async function(val) {
+                const seller = await Seller.findOne({_id:val})
+                if(!seller){
+                    return false
+                }
+                return true
+            },
+            message: "Seller does not exist"
+        } 
     },
     price: {
         type:Number,

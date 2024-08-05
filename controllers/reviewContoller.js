@@ -5,7 +5,7 @@ const { StatusCodes } = require('http-status-codes')
 const CustomError = require('../errors/customError')
 
 const getAllReviews = async (req, res) => {
-    const reviews = await Review.find({})
+    const reviews = await Review.find({user:req.user.userId})
     if(!reviews){
         throw new CustomError('Review not found.')
     }
@@ -17,7 +17,7 @@ const getReview = async (req, res) => {
         params: {id: reviewId},
     } = req
 
-    const review = await Review.findOne({_id: reviewId})
+    const review = await Review.findOne({_id: reviewId, user:req.user.userId})
     if(!review){
         throw new CustomError('Review does not exist')
     }
@@ -30,7 +30,7 @@ const updateReview = async (req, res) => {
     } = req
 
     const review = await Review.findByIdAndUpdate(
-        {_id: reviewId},
+        {_id: reviewId, user:req.user.userId},
         req.body,
         {new: true}
     )
@@ -43,6 +43,7 @@ const updateReview = async (req, res) => {
 }
 
 const createReview = async (req, res) => {
+    req.body.user = req.user.userId
     const review = await Review.create(req.body)
     if(!review){
         throw new CustomError('Could not create review')
@@ -53,7 +54,6 @@ const createReview = async (req, res) => {
     const newRating = (req.body.rating + (product.avgRating*product.amountRatings)) / (product.amountRatings + 1)
     product.avgRating = newRating
     product.amountRatings = product.amountRatings + 1
-    console.log(newRating, req.body.rating, product.amountRatings)
     const newProduct = await Product.findByIdAndUpdate({_id:product._id}, product, {new:true})
     if(!newProduct){
         throw new CustomError('Could not update product rating')
@@ -74,7 +74,7 @@ const deleteReview = async (req, res) => {
         params: {id: reviewId},
     } = req
 
-    const review = await Review.findOne({_id: reviewId}).lean()
+    const review = await Review.findOne({_id: reviewId, user:req.user.userId}).lean()
     if(!review){
         throw new CustomError('Review does not exist')
     }

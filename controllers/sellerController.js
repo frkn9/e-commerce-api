@@ -22,7 +22,7 @@ const getSeller = async (req, res) => {
         throw new CustomError('Seller does not exist')
     }
 
-    const products = await Product.find({ 'seller': sellerId });       //get products the seller is selling
+    const products = await Product.find({seller: sellerId });       //get products the seller is selling
     seller.products = products
     res.status(StatusCodes.OK).json({seller})
 }

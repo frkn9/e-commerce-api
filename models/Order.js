@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 
+const Product = require('./Product')
+
 const OrderSchema = new mongoose.Schema({
     user: {
         type:mongoose.Types.ObjectId,
@@ -7,7 +9,17 @@ const OrderSchema = new mongoose.Schema({
     },
     product: {
         type:mongoose.Types.ObjectId,
-        required:[true, "Please enter product ID."]
+        required:[true, "Please enter product ID."],
+        validate: {
+            validator: async function(val) {
+                const product = await Product.findOne({_id:val})
+                if(!product){
+                    return false
+                }
+                return true
+            },
+            message: "Product does not exist"
+        }
     },
     price: {
         type:Number,
